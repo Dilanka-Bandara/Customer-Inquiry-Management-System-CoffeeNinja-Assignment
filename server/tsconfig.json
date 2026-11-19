@@ -15,5 +15,5 @@
     "noUncheckedIndexedAccess": true,
     "isolatedModules": true
   },
-  "include": ["src", "prisma", "prisma.config.ts", "tests"]
+  "include": ["src", "prisma", "prisma.config.ts", "vitest.config.ts", "tests"]
 }
