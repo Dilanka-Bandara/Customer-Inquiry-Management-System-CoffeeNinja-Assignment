@@ -1,0 +1,19 @@
+{
+  // We run TypeScript directly with `tsx` (no build step), so tsc is only used
+  // for type-checking (`npm run typecheck`).
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "isolatedModules": true
+  },
+  "include": ["src", "prisma", "prisma.config.ts", "tests"]
+}

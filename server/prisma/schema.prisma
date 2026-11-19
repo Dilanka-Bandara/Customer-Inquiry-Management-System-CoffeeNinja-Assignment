@@ -1,0 +1,69 @@
+// Data model for the Customer Inquiry Management System.
+// TypeScript code uses camelCase names; the database uses snake_case (@map / @@map).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// ADMIN sees and manages every inquiry. STAFF only sees inquiries they created or are assigned to.
+enum Role {
+  ADMIN
+  STAFF
+}
+
+/// Allowed transitions are enforced in the API (see the inquiry service):
+/// NEW -> IN_PROGRESS -> RESOLVED, and RESOLVED -> IN_PROGRESS (reopen).
+enum InquiryStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  passwordHash String   @map("password_hash")
+  role         Role     @default(STAFF)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  createdInquiries  Inquiry[] @relation("InquiryCreatedBy")
+  assignedInquiries Inquiry[] @relation("InquiryAssignedTo")
+
+  @@map("users")
+}
+
+model Inquiry {
+  id           Int           @id @default(autoincrement())
+  customerName String        @map("customer_name") @db.VarChar(100)
+  /// Email address or phone number - one free-text field keeps the form simple
+  contact      String        @db.VarChar(150)
+  subject      String        @db.VarChar(150)
+  description  String        @db.VarChar(2000)
+  status       InquiryStatus @default(NEW)
+
+  /// Optimistic concurrency: increases by 1 on every change.
+  /// An update must send the version it last saw; a mismatch means the data is stale (409).
+  version Int @default(1)
+
+  createdById  Int   @map("created_by_id")
+  createdBy    User  @relation("InquiryCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  /// The one extra field: who is currently handling this inquiry (optional)
+  assignedToId Int?  @map("assigned_to_id")
+  assignedTo   User? @relation("InquiryAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Indexes for the queries the app actually runs:
+  @@index([status]) // filter list by status
+  @@index([createdById]) // staff access rule ("created by me")
+  @@index([assignedToId]) // staff access rule ("assigned to me")
+  @@index([contact, subject, createdAt]) // quick "possible duplicate" check on create
+  @@map("inquiries")
+}
