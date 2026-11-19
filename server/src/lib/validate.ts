@@ -13,5 +13,5 @@ export function validate<T extends z.ZodType>(schema: T, input: unknown): z.infe
     // Keep only the first message per field - the most useful one for the user.
     fields[key] ??= issue.message;
   }
-  throw new AppError("VALIDATION_ERROR", "Please check the highlighted fields", fields);
+  throw new AppError("VALIDATION_ERROR", "Please check the highlighted fields", { fields });
 }

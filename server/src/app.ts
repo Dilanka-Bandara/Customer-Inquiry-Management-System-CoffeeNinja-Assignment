@@ -7,6 +7,8 @@ import { config } from "./config";
 import { prisma } from "./db";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler";
 import { authRouter } from "./modules/auth/auth.routes";
+import { inquiryRouter } from "./modules/inquiries/inquiry.routes";
+import { userRouter } from "./modules/users/user.routes";
 
 export function createApp() {
   const app = express();
@@ -23,7 +25,8 @@ export function createApp() {
   });
 
   app.use("/api/auth", authRouter);
-  // (Inquiry routes are added in the next step, all behind requireAuth.)
+  app.use("/api/inquiries", inquiryRouter); // all routes require sign-in
+  app.use("/api/users", userRouter); // admin only
 
   app.use(notFoundHandler);
   app.use(errorHandler);
