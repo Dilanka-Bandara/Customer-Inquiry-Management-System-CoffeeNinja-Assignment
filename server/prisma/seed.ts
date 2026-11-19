@@ -21,7 +21,8 @@ async function main() {
   const alice = await upsertUser("alice@example.com", "Alice Staff", "STAFF");
   const bob = await upsertUser("bob@example.com", "Bob Staff", "STAFF");
 
-  await prisma.inquiry.deleteMany();
+  // Remove old sample data AND restart ids at 1, so seeded inquiries are always #1-#4.
+  await prisma.$executeRaw`TRUNCATE TABLE inquiries RESTART IDENTITY`;
 
   await prisma.inquiry.createMany({
     data: [
