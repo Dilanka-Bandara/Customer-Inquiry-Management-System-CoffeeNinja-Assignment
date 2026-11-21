@@ -109,7 +109,7 @@ export function NewInquiryPage() {
           error={errors.customerName}
         />
         <FormField
-          label="Email or phone"
+          label="Contact (email or phone)"
           name="contact"
           autoComplete="off"
           hint="How the team can reach the customer"

@@ -38,7 +38,7 @@ export function StatusActions({ inquiry }: { inquiry: Inquiry }) {
       {update.isSuccess && <Alert tone="success">Status changed to {STATUS_LABEL[update.data.status]}.</Alert>}
 
       {isApiError(update.error, 'VERSION_CONFLICT') ? (
-        <Alert tone="warning" title="This inquiry was updated by someone else">
+        <Alert tone="warning" title="This inquiry was changed in another tab or by someone else">
           It is now <strong>{STATUS_LABEL[inquiry.status]}</strong>. Your change was not saved. The page now shows the
           latest details - check them, then try again if needed.
         </Alert>

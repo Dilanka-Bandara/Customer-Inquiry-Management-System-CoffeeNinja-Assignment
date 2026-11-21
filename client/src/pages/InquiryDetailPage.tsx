@@ -1,7 +1,7 @@
 import { Link, useLocation, useParams } from 'react-router'
 import { isApiError } from '../api/client'
 import { useInquiry } from '../api/inquiries'
-import { useCurrentUser } from '../auth/useAuth'
+import { useCurrentUser } from '../auth/currentUser'
 import { Alert } from '../components/Alert'
 import { AssigneeControl } from '../components/AssigneeControl'
 import { ErrorState, LoadingBlock } from '../components/States'

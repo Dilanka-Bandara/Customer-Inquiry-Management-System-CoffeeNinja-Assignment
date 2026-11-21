@@ -1,8 +1,8 @@
 // Who is signed in? The server is the source of truth: we ask GET /api/auth/me.
 // (The cookie is httpOnly, so JavaScript can't read it - and shouldn't need to.)
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { api, ApiError } from '../api/client'
-import { meKey } from '../api/queryClient'
+import { meKey, setSessionUser } from '../api/queryClient'
 import type { User } from '../types'
 
 export function useMe() {
@@ -21,32 +21,18 @@ export function useMe() {
   })
 }
 
-/** For components inside the protected area: the signed-in user, never null. */
-export function useCurrentUser(): User {
-  const { data } = useMe()
-  if (!data) throw new Error('useCurrentUser must be used inside <RequireAuth>')
-  return data
-}
-
 export function useLogin() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: (body: { email: string; password: string }) =>
       api<{ user: User }>('/auth/login', { method: 'POST', body }),
-    onSuccess: ({ user }) => {
-      qc.clear() // drop anything cached for a previous user
-      qc.setQueryData(meKey, user)
-    },
+    onSuccess: ({ user }) => setSessionUser(user),
   })
 }
 
 export function useLogout() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: () => api<void>('/auth/logout', { method: 'POST' }),
-    onSettled: () => {
-      qc.clear()
-      qc.setQueryData(meKey, null)
-    },
+    // onSettled = success OR failure: even if the server can't be reached, sign out locally.
+    onSettled: () => setSessionUser(null),
   })
 }
