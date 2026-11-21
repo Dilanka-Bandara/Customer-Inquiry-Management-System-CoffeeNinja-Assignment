@@ -1,12 +1,11 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate, useLocation, useNavigate, type Location } from 'react-router'
+import { Navigate, useLocation, type Location } from 'react-router'
 import { isApiError } from '../api/client'
 import { useLogin, useMe } from '../auth/useAuth'
 import { Alert } from '../components/Alert'
 import { FormField } from '../components/FormField'
 
 export function LoginPage() {
-  const navigate = useNavigate()
   const location = useLocation()
   const from = (location.state as { from?: Location } | null)?.from
   const { data: user } = useMe()
@@ -16,8 +15,9 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
 
-  // Already signed in (e.g. pressed Back) -> go straight to the workspace.
-  if (user) return <Navigate to="/inquiries" replace />
+  // Signed in (just now, or already) -> go to the page they originally asked for, e.g. a shared
+  // inquiry link, otherwise the list. This one redirect handles both cases.
+  if (user) return <Navigate to={from ? `${from.pathname}${from.search}` : '/inquiries'} replace />
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -28,11 +28,8 @@ export function LoginPage() {
     setErrors(next)
     if (next.email || next.password) return
 
-    login.mutate(
-      { email, password },
-      // Send them back to the page they originally asked for (e.g. a shared inquiry link).
-      { onSuccess: () => navigate(from ? `${from.pathname}${from.search}` : '/inquiries', { replace: true }) },
-    )
+    // On success useLogin stores the user, this page re-renders, and the redirect above runs.
+    login.mutate({ email, password })
   }
 
   const serverError = login.error

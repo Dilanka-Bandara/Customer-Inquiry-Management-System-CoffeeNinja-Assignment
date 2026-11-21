@@ -53,7 +53,7 @@ export function AssigneeControl({ inquiry }: { inquiry: Inquiry }) {
       {update.isSuccess && <Alert tone="success">Now assigned to {update.data.assignedTo?.name ?? 'nobody'}.</Alert>}
       {update.error &&
         (isApiError(update.error, 'VERSION_CONFLICT') ? (
-          <Alert tone="warning" title="This inquiry was updated by someone else">
+          <Alert tone="warning" title="This inquiry was changed in another tab or by someone else">
             Your change was not saved. The latest details are shown - check them and try again.
           </Alert>
         ) : (

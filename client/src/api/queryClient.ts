@@ -1,14 +1,24 @@
 // TanStack Query setup: caching, retries and one global rule for "you are signed out".
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
+import type { User } from '../types'
 import { ApiError } from './client'
 
 export const meKey = ['auth', 'me'] as const
 
+/**
+ * Switch the signed-in user (null = signed out) and drop everything cached for the previous one.
+ * We UPDATE the "me" entry rather than clearing the whole cache: components watching it
+ * (like the route guard) are then notified and react - e.g. redirect to /login.
+ */
+export function setSessionUser(user: User | null) {
+  queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== meKey[0] })
+  queryClient.setQueryData(meKey, user)
+}
+
 /** If ANY request answers 401, the session is over: forget the user, and the route guard sends them to /login. */
 function handleError(err: unknown) {
   if (err instanceof ApiError && err.status === 401 && queryClient.getQueryData(meKey)) {
-    queryClient.clear()
-    queryClient.setQueryData(meKey, null)
+    setSessionUser(null)
   }
 }
 
