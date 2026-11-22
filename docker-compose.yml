@@ -5,6 +5,7 @@ services:
   db:
     image: postgres:17-alpine
     container_name: inquiry-db
+    restart: unless-stopped # comes back automatically after Docker/PC restarts
     environment:
       POSTGRES_USER: inquiry
       POSTGRES_PASSWORD: inquiry
